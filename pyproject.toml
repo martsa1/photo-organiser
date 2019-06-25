@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "photo_organiser"
+name = "organiser"
 version = "0.1.0"
 description = "Python script to organise and de-duplicate photos, taking manually named directories into account along the way."
 authors = ["Sam Martin <sam@abitmoredepth.com>"]
@@ -7,7 +7,8 @@ license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.7"
-aiofiles = "^0.4.0"
+exifread = "^2.1"
+fire = "^0.1.3"
 
 [tool.poetry.dev-dependencies]
 ipython = "^7.5"
@@ -16,7 +17,7 @@ mypy = "^0.701.0"
 pylint = "^2.3"
 
 [tool.poetry.scripts]
-organiser = "organiser:main.main"
+organiser = "organiser.main:main"
 
 [build-system]
 requires = ["poetry>=0.12"]
