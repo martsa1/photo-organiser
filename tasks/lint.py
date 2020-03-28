@@ -15,4 +15,3 @@ def lint(context):
     context.run("mypy {}".format(files_space_separated), warn=True)
 
     context.run("pylint {}".format(files_space_separated), warn=True)
-
