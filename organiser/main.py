@@ -33,6 +33,10 @@ def main(base_dir: str = "", storage_dir: str = "", copy_only: bool = False) -> 
         copy_only: A flag to request that we make copies of files, rather than
             moving them.
     """
+
+    if not storage_dir:
+        storage_dir = base_dir
+
     file_listing = rx.from_iterable(
         fl.file_listing_iterator(base_dir, r'.*(?:jpg|JPG|JPEG|jpeg)$'),
     )
@@ -49,8 +53,14 @@ def main(base_dir: str = "", storage_dir: str = "", copy_only: bool = False) -> 
     )
 
     files_with_move_path = files_with_metadata.pipe(
-        operators.map(lambda target: fc.identify_photo_move_path("", target)),
+        operators.map(lambda target: fc.identify_photo_move_path(storage_dir, target)),
         operators.map(lambda target: target.clear_contents_data()),
+    )
+
+    # TODO - Add duplicate file checks in here!!
+
+    move_operations = files_with_move_path.pipe(
+            operators.map(lambda target: (target.file_path, target.target_move_path)),
     )
 
     def printer(target: FileTarget) -> str:
@@ -63,8 +73,8 @@ def main(base_dir: str = "", storage_dir: str = "", copy_only: bool = False) -> 
             f"   Image taken at: {target.image_metadata.get('EXIF DateTimeOriginal', 'Unknown')}"
         )
 
-    files_with_move_path.subscribe(
-        on_next=lambda target: print(printer(target)),
+    move_operations.subscribe(
+        on_next=lambda target: print(target),
         on_error=lambda err: print(err),
         on_completed=lambda: print("Done"),
     )
