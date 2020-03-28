@@ -8,11 +8,12 @@ def test_identify_move_path() -> None:
     """Verify we create the correct basic folder path from a given photo's
     filepath and timestamp (calculated elsewhere).
     """
-    sample_filepath = "IMG_4228.JPG"
-    timestamp = pendulum.DateTime(year=2015, month=5, day=4)
+    sample_target = fc.FileTarget("IMG_4228.JPG")
+    sample_target.datestamp = pendulum.parse("2015/05/04")
     expected_result = "2015/05/2015.05.04_IMG_4228.JPG"
 
-    assert fc.identify_move_path(sample_filepath, "", timestamp) == expected_result
+    output = fc.identify_photo_move_path("", sample_target)
+    assert output.target_move_path == expected_result
 
 
 @pytest.mark.parametrize(
@@ -20,12 +21,12 @@ def test_identify_move_path() -> None:
     [
         (
             "2015.05.03 Curry with Mates/IMG_4228.JPG",
-            pendulum.DateTime(year=2015, month=5, day=5),
+            pendulum.parse("2015/05/05"),
             "2015/05/2015.05 Curry with Mates/2015.05.05_IMG_4228.JPG",
         ),
         (
             "some_folder/some other folder/2015.05.03 Curry with Mates/IMG_4228.JPG",
-            pendulum.DateTime(year=2015, month=5, day=5),
+            pendulum.parse("2015/05/05"),
             "2015/05/2015.05 Curry with Mates/2015.05.05_IMG_4228.JPG",
         ),
     ],
@@ -38,7 +39,11 @@ def test_identify_move_with_album_name(
     datestamp, over any date information in the provided file path.
     """
 
-    assert fc.identify_move_path(sample_filepath, "", timestamp) == expected_result
+    sample_file_target = fc.FileTarget(sample_filepath)
+    sample_file_target.datestamp = timestamp
+
+    output = fc.identify_photo_move_path("", sample_file_target)
+    assert output.target_move_path == expected_result
 
 
 @pytest.mark.parametrize(
@@ -62,11 +67,9 @@ def test_identity_move_with_prefix(
     from the identify_move_path function.
     """
 
-    sample_filepath = "IMG_4228.JPG"
-    timestamp = pendulum.DateTime(year=2015, month=5, day=5)
+    sample_file_target = fc.FileTarget("IMG_4228.JPG")
+    sample_file_target.datestamp = pendulum.parse("2015/05/05")
 
-    assert fc.identify_move_path(
-        sample_filepath,
-        prefix,
-        timestamp,
-    ) == expected_result
+    output = fc.identify_photo_move_path(prefix, sample_file_target)
+
+    assert output.target_move_path == expected_result
