@@ -13,9 +13,9 @@ pendulum = "^2.0"
 typing-extensions = "^3.7"
 rx = "^3.1.0"
 cryptography = "^2.8"
+better_exceptions = "*"
 
 [tool.poetry.dev-dependencies]
-better_exceptions = "*"
 flake8 = "^3.7"
 flake8-blind-except = "*"
 flake8-builtins = "*"
