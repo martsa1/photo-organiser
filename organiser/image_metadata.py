@@ -69,6 +69,6 @@ def identify_image_datestamp(target: FileTarget) -> FileTarget:
     else:
         # Take the newest one - This is somewhat arbitrary...
         LOG.debug("Date fields did not agree with one another: %s", parsed_datestamps)
-        target.datestamp = max(parsed_datestamps)
+        target.datestamp = min(parsed_datestamps)
 
     return target
