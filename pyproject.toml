@@ -6,14 +6,14 @@ authors = ["Sam Martin <sam@abitmoredepth.com>"]
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = "*"
+python = "^3.8"
 exifread = "*"
-fire = "*"
 pendulum = "*"
 typing-extensions = "*"
-rx = "*"
+rx = "^3"
 cryptography = "*"
 better_exceptions = "*"
+typer = "^0.1.1"
 
 [tool.poetry.dev-dependencies]
 flake8 = "*"
@@ -42,9 +42,11 @@ pyls-mypy = "*"
 pyls-isort = "*"
 yapf = "*"
 pdbpp = "*"
+jupyterlab = "*"
+typer-cli = "^0.0.8"
 
 [tool.poetry.scripts]
-organiser = "organiser.main:main"
+organiser = "organiser.main:entrypoint"
 
 [build-system]
 requires = ["poetry>=0.12"]
