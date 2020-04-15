@@ -56,3 +56,51 @@ class FileTarget:
             return True
 
         return False
+
+    def update(self, other: "FileTarget", overwrite: bool = False) -> "FileTarget":
+        """Update any attributes on self, that are provided by other.
+
+        If overwrite is set, update even data already set on self.
+
+        Will skip updating with other's values, if those values are also unset.
+
+        Will never update the original file path (effectively thats our primary
+        key).
+        """
+        excludes = ("file_path",)
+        attrs = (
+            attr for attr in dir(other)
+            if not callable(getattr(other, attr)) and not attr.startswith("_")
+        )
+
+        for attr in attrs:
+            if attr in excludes:
+                continue
+
+            other_attr = getattr(other, attr)
+            if not other_attr:
+                # Don't bother updating if other doesn't have a value for this attribute.
+                continue
+
+            if overwrite:
+                setattr(self, attr, other_attr)
+
+            elif not getattr(self, attr):
+                setattr(self, attr, other_attr)
+
+        return self
+
+
+@dataclass
+class FailedTarget():
+    """Subclass of FileTarget used to track operations which failed."""
+
+    original_record: FileTarget
+    failure_reason: Exception
+
+    def __str__(self) -> str:
+        return (
+            f"FailedTarget:"
+            f" Original Path: {self.original_record.file_path}\n"
+            f"    Reason for Failure: {self.failure_reason}"
+        )

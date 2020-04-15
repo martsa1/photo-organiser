@@ -4,7 +4,9 @@ import base64
 import logging
 import os
 import re
-from typing import Dict, Iterable, Optional, Tuple
+from os.path import relpath
+from pathlib import Path
+from typing import Iterable, Optional
 
 import rx
 from cryptography.hazmat.backends import default_backend
@@ -17,14 +19,14 @@ LOG = logging.getLogger(__file__)
 
 
 def file_listing_iterator(
-        base_dir: Optional[str] = None,
+        base_dir: Optional[Path] = None,
         filename_filter: Optional[str] = None,
 ) -> Iterable[FileTarget]:
     """Yield FileTargets for files in the provided bsae directory, matching filename_filter."""
-    if not base_dir:
-        base_dir = os.path.dirname(__file__)
+    if base_dir is None:
+        base_dir = Path(os.path.dirname(__file__))
 
-    for directory, _, filenames in os.walk(base_dir):
+    for directory, _, filenames in os.walk(relpath(base_dir.absolute(), os.path.curdir)):
         for filename in filenames:
             if filename_filter:
                 try:
@@ -45,10 +47,9 @@ def file_listing_iterator(
                 yield FileTarget(os.path.join(directory, filename))
 
 
-def observable_file_list(base_dir: Optional[str] = None, filter: str = "") -> rx.Observable:
-    observable_file_list = rx.from_iterable(file_listing_iterator(base_dir, filter))
-
-    return observable_file_list
+def observable_file_list(base_dir: Optional[str] = None, filter_: str = "") -> rx.Observable:
+    """Return an Observable from file listing, whilst handling directory and filter arguments."""
+    return rx.from_iterable(file_listing_iterator(base_dir, filter_))
 
 
 def sha256_file(file_target: FileTarget) -> FileTarget:
@@ -91,10 +92,11 @@ if __name__ == "__main__":
     file_listing = rx.from_iterable(file_listing_iterator())
 
     hashed_files = file_listing.pipe(
-        operators.map(load_file_contents), operators.map(sha256_file),
+        operators.map(load_file_contents),
+        operators.map(sha256_file),
         operators.map(encode_shasum),
-        operators.map(lambda target: target.clear_contents_data())
+        operators.map(lambda target: target.clear_contents_data()),
         #  operators.map(lambda file_path, file_hash: (file_path, b64_encode(file_hash))),
     )
 
-    hashed_files.subscribe(lambda target: print(target))
+    hashed_files.subscribe(print)

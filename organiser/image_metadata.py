@@ -5,6 +5,7 @@ from typing import Dict, List
 import io
 import logging
 import pendulum
+from os.path import getmtime
 
 from organiser.types import FileTarget
 
@@ -59,8 +60,16 @@ def identify_image_datestamp(target: FileTarget) -> FileTarget:
             pass
 
     if not parsed_datestamps:
-        LOG.info("Unable to identify image datestamp")
+        LOG.info("Unable to identify image datestamp from metadata, attempting by file.")
+        mod_time = getmtime(target.file_path)
+        mod_datestamp = pendulum.from_timestamp(mod_time)
+        if mod_datestamp:
+            target.datestamp = mod_datestamp
+        else:
+            LOG.info("Unable to resolve modified time of file either.")
+
         return target
+
 
     if len(parsed_datestamps) == 1:
         LOG.debug("Date fields seem to agree with one another")
